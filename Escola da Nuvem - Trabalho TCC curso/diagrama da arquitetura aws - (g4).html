@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitetura AWS</title>
+    <style>
+        body {
+            font-family: 'Amazon Ember', Arial, sans-serif;
+            background: linear-gradient(135deg, #232F3E 0%, #1A252F 100%);
+            margin: 0;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .title {
+            text-align: center;
+            color: #232F3E;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #FF9900, #FF6600);
+        }
+        
+        .architecture {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 40px;
+            margin-top: 40px;
+        }
+        
+        .zone {
+            background: #F8F9FA;
+            border: 2px solid #E1E4E8;
+            border-radius: 12px;
+            padding: 25px;
+            position: relative;
+            min-height: 200px;
+        }
+        
+        .zone-title {
+            font-weight: bold;
+            color: #232F3E;
+            font-size: 16px;
+            margin-bottom: 20px;
+            padding: 8px 12px;
+            background: #FF9900;
+            color: white;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .aws-service {
+            background: white;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .aws-service:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .service-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px;
+            background: #FF9900;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .service-name {
+            font-weight: bold;
+            color: #232F3E;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .service-tier {
+            color: #4CAF50;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .connection {
+            position: absolute;
+            background: #FF9900;
+            z-index: 10;
+        }
+        
+        .connection-horizontal {
+            height: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .connection-vertical {
+            width: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+        
+        .arrow-right {
+            border-left: 8px solid #FF9900;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .arrow-down {
+            border-top: 8px solid #FF9900;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .flow-label {
+            position: absolute;
+            background: #232F3E;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .user-icon {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .user {
+            width: 60px;
+            height: 60px;
+            background: #FF9900;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .pricing-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 40px;
+        }
+        
+        .legend {
+            background: #F8F9FA;
+            border: 2px solid #E1E4E8;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .legend-title {
+            font-weight: bold;
+            color: #232F3E;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #232F3E;
+            font-size: 14px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        .aws-logo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 14px;
+            color: #FF9900;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="aws-logo">AWS</div>
+        <h1 class="title">Arquitetura de Aplicação Web Serverless</h1>
+        
+        <div class="user-icon">
+            <div class="user">👤</div>
+            <div style="color: #232F3E; font-weight: bold;">Usuário</div>
+        </div>
+        
+        <div class="architecture">
+            <!-- Frontend Zone -->
+            <div class="zone">
+                <div class="zone-title">Frontend (Grátis)</div>
+                
+                <div class="aws-service">
+                    <div class="service-icon">☁️</div>
+                    <div class="service-name">Amazon CloudFront</div>
+                    <div class="service-tier">Nível Gratuito</div>
+                    <div class="pricing-badge">$</div>
+                </div>
+                
+                <div class="aws-service">
+                    <div class="service-icon">📦</div>
+                    <div class="service-name">Amazon S3</div>
+                    <div class="service-tier">Nível Gratuito</div>
+                    <div class="pricing-badge">$</div>
+                </div>
+            </div>
+            
+            <!-- Authentication Zone -->
+            <div class="zone">
+                <div class="zone-title">Autenticação (Grátis)</div>
+                
+                <div class="aws-service">
+                    <div class="service-icon">🔑</div>
+                    <div class="service-name">Amazon API Gateway</div>
+                    <div class="service-tier">Nível Gratuito - 12m</div>
+                    <div class="pricing-badge">$</div>
+                </div>
+                
+                <div class="aws-service">
+                    <div class="service-icon">🧠</div>
+                    <div class="service-name">Amazon Cognito</div>
+                    <div class="service-tier">Nível Gratuito</div>
+                    <div class="pricing-badge">$</div>
+                </div>
+            </div>
+            
+            <!-- Backend Zone -->
+            <div class="zone">
+                <div class="zone-title">API & Backend (Grátis)</div>
+                
+                <div class="aws-service">
+                    <div class="service-icon">λ</div>
+                    <div class="service-name">AWS Lambda</div>
+                    <div class="service-tier">Nível Gratuito</div>
+                    <div class="pricing-badge">$</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bottom-row">
+            <!-- Monitoring Zone -->
+            <div class="zone">
+                <div class="zone-title">Monitoramento (Grátis)</div>
+                
+                <div class="aws-service">
+                    <div class="service-icon">📊</div>
+                    <div class="service-name">Amazon CloudWatch</div>
+                    <div class="service-tier">Nível Gratuito</div>
+                    <div class="pricing-badge">$</div>
+                </div>
+            </div>
+            
+            <!-- Database Zone -->
+            <div class="zone">
+                <div class="zone-title">Banco de Dados (Grátis)</div>
+                
+                <div class="aws-service">
+                    <div class="service-icon">🗄️</div>
+                    <div class="service-name">Amazon DynamoDB</div>
+                    <div class="service-tier">Nível Gratuito</div>
+                    <div class="pricing-badge">$</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-title">Legenda</div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4CAF50;"></div>
+                Serviços AWS com Nível Gratuito
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FF9900;"></div>
+                Fluxo de Dados/Requisições
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #232F3E;"></div>
+                Arquitetura Serverless
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Add subtle animations
+        const services = document.querySelectorAll('.aws-service');
+        services.forEach((service, index) => {
+            service.style.animationDelay = `${index * 0.1}s`;
+            service.style.animation = 'fadeInUp 0.6s ease forwards';
+        });
+        
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .aws-service {
+                opacity: 0;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
